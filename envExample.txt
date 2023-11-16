@@ -1,0 +1,4 @@
+STAGE=staging
+DB_URL_LOCAL="mongodb://userName:passWord@localhost:5432/"
+PORT=3000
+TOKEN_KEY='randomKey' // Salt to encrypt password.

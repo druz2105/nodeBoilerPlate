@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 
 import jwt from "jsonwebtoken";
 
-import sgMail from "@sendgrid/mail";
 import env from "@lib/env";
 import {
   CreateUserInterface,
@@ -12,7 +11,6 @@ import {
   UserModelInterface,
 } from "@lib/interfaces/users/userModel";
 
-sgMail.setApiKey(env.SENDGRID_KEY);
 
 const userSchema = new mongoose.Schema<UserModelInterface>({
   username: {
@@ -133,43 +131,7 @@ export default class UserService {
     return bcrypt.compareSync(password, hash);
   };
 
-  sendVerificationEmail = async (user: UserModelInterface) => {
-    const verificationLink = `${env.VERIFICATION_LINK}${user._id.toString()}`;
-    const msg = {
-      to: user.email,
-      from: env.SEND_EMAIL,
-      subject: "Verify User Account",
-      templateId: env.VERIFY_ACCOUNT_TEMPLATE,
-      dynamicTemplateData: {
-        fullName: user.username,
-        verificationLink: verificationLink,
-      },
-    };
-    await sgMail.send(msg);
-  };
 
-  sendResetPasswordEmail = async (user: UserModelInterface) => {
-    const jwtToken = jwt.sign(
-      {
-        user_id: user._id,
-      },
-      env.TOKEN_KEY,
-      {
-        expiresIn: "2h",
-      }
-    );
-    const passwordResetLink = `${env.RESET_PASSWORD_LINK}${jwtToken}`;
-    const msg = {
-      to: user.email,
-      from: env.SEND_EMAIL,
-      subject: "Reset Password Account",
-      templateId: env.RESET_PASSWORD_TEMPLATE,
-      dynamicTemplateData: {
-        passwordResetLink: passwordResetLink,
-      },
-    };
-    await sgMail.send(msg);
-  };
   getById = (id: string) => {
     return UserModel.findById(id);
   };
